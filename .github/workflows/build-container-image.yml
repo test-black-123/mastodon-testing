@@ -47,8 +47,8 @@ jobs:
           image_names=${PUSH_TO_IMAGES//$'\n'/,}
           echo "IMAGE_NAMES=${image_names%,}" >> $GITHUB_ENV
 
-      - uses: docker/setup-buildx-action@v3
-        id: buildx
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v1
 
       - name: Log in to Docker Hub
         if: contains(inputs.push_to_images, 'tootsuite')
@@ -76,7 +76,7 @@ jobs:
 
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: .
           file: ${{ inputs.file_to_build }}
@@ -87,8 +87,6 @@ jobs:
           platforms: ${{ matrix.platform }}
           provenance: false
           push: ${{ inputs.push_to_images != '' }}
-          cache-from: ${{ inputs.cache && 'type=gha' || '' }}
-          cache-to: ${{ inputs.cache && 'type=gha,mode=max' || '' }}
           outputs: type=image,"name=${{ env.IMAGE_NAMES }}",push-by-digest=true,name-canonical=true,push=${{ inputs.push_to_images != '' }}
 
       - name: Export digest
@@ -111,7 +109,7 @@ jobs:
   # Then merge the docker images into a single one
   merge-images:
     if: ${{ inputs.push_to_images != '' }}
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs:
       - build-image
 
@@ -144,8 +142,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v1
 
       - name: Docker meta
         id: meta
