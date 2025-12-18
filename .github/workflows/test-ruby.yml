@@ -17,9 +17,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  id-token: write  # Required for requesting the JWT from Depot
+
 jobs:
   build:
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-24.04
 
     strategy:
       fail-fast: true
@@ -75,7 +79,7 @@ jobs:
           retention-days: 0
 
   test:
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-24.04
 
     needs:
       - build
@@ -176,7 +180,7 @@ jobs:
 
   test-imagemagick:
     name: ImageMagick tests
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-24.04
 
     needs:
       - build
@@ -263,7 +267,7 @@ jobs:
 
   test-e2e:
     name: End to End testing
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-24.04
 
     needs:
       - build
@@ -366,7 +370,7 @@ jobs:
 
   test-search:
     name: Elastic Search integration testing
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-24.04
 
     needs:
       - build
